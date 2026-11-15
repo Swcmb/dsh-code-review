@@ -2,7 +2,7 @@
 
 简体中文 | [English](CODE-REVIEW-CONTRACT.md)
 
-插件包：本仓库根目录（`@jkin8010/dsh-code-review` v0.9.3）。
+插件包：本仓库根目录（`@jkin8010/dsh-code-review` v0.9.4）。
 基于 [alibaba/open-code-review](https://github.com/alibaba/open-code-review)（`ocr` CLI v1.13+）。
 左侧栏入口 `sidebar.panellist`（id `code-review`）+ 整页 `main`（key `code-review`）。
 Client 通过认证 RPC 取数据，Host 端持有全部 I/O（git / ocr 子进程 / 持久化）。

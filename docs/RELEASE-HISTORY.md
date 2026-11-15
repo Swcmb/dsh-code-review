@@ -12,6 +12,10 @@
 | [v0.4.0](https://github.com/jkin8010/dsh-code-review/releases/tag/v0.4.0) | 2026-11-10 | v0.4.0 — 评审报告一键新建修复 Session |
 | [v0.5.0](https://github.com/jkin8010/dsh-code-review/releases/tag/v0.5.0) | 2026-11-10 | v0.5.0 — /code-review 斜杠命令（@项目 / --fix） |
 | [v0.6.1](https://github.com/jkin8010/dsh-code-review/releases/tag/v0.6.1) | 2026-11-10 | v0.6.1 — 评审报告「已修复」标识 + 架构/数据流重构 |
+| [v0.7.0](https://github.com/jkin8010/dsh-code-review/releases/tag/v0.7.0) | 2026-11-10 | v0.7.0 — 修复后自动复评并标记已修复 |
+| [v0.8.0](https://github.com/jkin8010/dsh-code-review/releases/tag/v0.8.0) | 2026-11-11 | v0.8.0 — 浅色主题与主题切换 |
+| [v0.9.1](https://github.com/jkin8010/dsh-code-review/releases/tag/v0.9.1) | 2026-11-11 | v0.9.1 — 信息流多列恢复 + 大图缩放/降噪 + 浅色主题 |
+| [v0.9.4](https://github.com/jkin8010/dsh-code-review/releases/tag/v0.9.4) | 2026-11-15 | v0.9.4 — 清空打包默认路径 + 预构建 tarball（插件市场） |
 
 ## Archived releases
 
@@ -268,3 +272,16 @@ _Released 2026-11-10_
 
 升级：`install_bundle target: https://github.com/jkin8010/dsh-code-review`。
 
+### v0.9.2 — 截图收进插件目录
+
+_Released 2026-11-11_（tag 保留，未建 GitHub Release）
+
+- README / 文档里的截图引用改为仓库内相对路径（`screenshots/`、`assets/`），不再依赖外部托管。
+- 仓库根新增 `screenshots.json`，向插件市场声明 6 张展示图（总览、详情、已修复、架构、信息流、项目）。
+
+### v0.9.3 — 插件实现扁平化到仓库根目录
+
+_Released 2026-11-12_（tag 保留，未建 GitHub Release）
+
+- 取消 `plugins/dsh-code-review/` 子目录，`index.js` / `client.js` / `host/` / `locale/` / `cordis.patch.yml` / `icon.svg` 全部移到仓库根，根 `package.json` 成为唯一的 bundle 清单。
+- 安装地址不变（仍是仓库根），`dsh.bundle → ./cordis.patch.yml`。
