@@ -20,7 +20,8 @@ import { addDays, dateKey, dayList } from '../../host/shared.js';
 
 const ROOT = new URL('../../', import.meta.url).pathname;
 const STATE = join(ROOT, 'tests', '.tmp', 'code-review-delegate-state');
-const REPO = join(ROOT, 'plugins', 'dsh-agent-cockpit');
+// 插件实现已扁平化到仓库根（v0.9.3），评审目标就是仓库自身。
+const REPO = ROOT.replace(/\/$/, '');
 
 await rm(STATE, { recursive: true, force: true });
 await mkdir(STATE, { recursive: true });

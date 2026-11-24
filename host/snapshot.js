@@ -111,7 +111,7 @@ const SKIP_SCAN_DIRS = new Set([
 /**
  * Discover repositories under the configured roots to `depth` levels.
  * Reviewing arbitrary workspaces means the plugin must also find repos nested
- * one level below a group directory (for example `<workspace>/qise-tech/repo`).
+ * one level below a group directory (for example `<workspace>/jkin8010/repo`).
  */
 async function scanRepos(roots, depth = 2, limit = 40) {
   const found = [];

@@ -101,7 +101,16 @@ With `engine: auto` (the default) the engine is resolved per review in this orde
 
 DeepSeek Harness (with the Web UI), the `ocr` CLI ≥ 1.13, `git` and Node 22+ are required.
 
-The repository root `package.json` is the single DSH bundle manifest (`dsh.bundle → cordis.patch.yml`), and the plugin code lives at the repository root — there is no `plugins/` subdirectory — so the plugin can be installed straight from the Git URL.
+The repository root `package.json` is the single DSH bundle manifest (`dsh.bundle → cordis.patch.yml`), and the plugin code lives at the repository root — there is no `plugins/` subdirectory — so the plugin can be installed from npm or straight from the Git URL.
+
+### Install from npm (recommended)
+
+```bash
+# a git tag triggers the GitHub Actions release; once published:
+plugin_manager → action: install_bundle, target: @jkin8010/dsh-code-review
+```
+
+> npm package: `@jkin8010/dsh-code-review`. Release flow: [docs/PUBLISHING.md](docs/PUBLISHING.md).
 
 ### One-click install (paste the prompt below into DSH)
 

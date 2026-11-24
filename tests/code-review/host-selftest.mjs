@@ -18,12 +18,34 @@ import { findingKey } from '../../host/shared.js';
 
 const ROOT = new URL('../../', import.meta.url).pathname;
 const STATE = join(ROOT, 'tests', '.tmp', 'code-review-host-state');
-const PLUGIN = join(ROOT);
+const PLUGIN = join(ROOT).replace(/\/+$/, '');
 const TEMP_REPO = join(ROOT, 'tests', '.tmp', 'diffdemo');
-const OCR = '/Users/jkin/.nvm/versions/node/v24.15.0/bin/ocr';
+// 不硬编码本机路径：CI 与本地都走自动探测（留空 = 插件自己找 PATH / nvm / Homebrew）。
+const OCR = process.env.CR_OCR_BIN || '';
 
 await rm(STATE, { recursive: true, force: true });
 await mkdir(STATE, { recursive: true });
+
+// diffdemo 夹具：一个带未提交改动的 git 仓库，供 workspace 评审断言使用。
+// （tests/.tmp 被 .gitignore 忽略，所以这里每次现建，而不是依赖已存在的目录。）
+await rm(TEMP_REPO, { recursive: true, force: true });
+await mkdir(TEMP_REPO, { recursive: true });
+{
+  const { execFileSync } = await import('node:child_process');
+  const run = (args) => execFileSync('git', args, { cwd: TEMP_REPO, stdio: 'ignore' });
+  run(['init', '-q']);
+  run(['config', 'user.email', 'fixture@example.com']);
+  run(['config', 'user.name', 'fixture']);
+  await writeFile(join(TEMP_REPO, 'index.js'), "export function load(id) {\n  return fetch('/api/' + id);\n}\n");
+  await writeFile(join(TEMP_REPO, 'util.js'), 'export const ok = true;\n');
+  run(['add', '-A']);
+  run(['commit', '-qm', 'init']);
+  // 注入两类问题：SQL 拼接（security）与吞掉异常（bug）
+  await writeFile(
+    join(TEMP_REPO, 'index.js'),
+    "export function load(id) {\n  return eval('fetch(\'' + id + '\')');\n}\n\nexport function save(x) {\n  try {\n    return db.write(x);\n  } catch (e) {}\n}\n",
+  );
+}
 
 let route = null;
 const effects = [];

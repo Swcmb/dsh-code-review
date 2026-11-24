@@ -1,7 +1,6 @@
 {
   "name": "@jkin8010/dsh-code-review",
-  "version": "0.9.4",
-  "private": true,
+  "version": "0.9.5",
   "type": "module",
   "description": "代码评审中心：基于 alibaba/open-code-review 的 DeepSeek Harness 插件，支持当前改动/提交/分支、项目架构、代码模块与信息流业务工作流评审，提供实时进度与动态、GitHub 风格提交热力图与评审统计。",
   "license": "Apache-2.0",
@@ -13,6 +12,15 @@
   "homepage": "https://github.com/jkin8010/dsh-code-review#readme",
   "bugs": {
     "url": "https://github.com/jkin8010/dsh-code-review/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "scripts": {
+    "test": "node tests/code-review/engine-selftest.mjs && node tests/code-review/delegate-selftest.mjs && node tests/code-review/tool-selftest.mjs && node tests/code-review/analyze.test.mjs",
+    "test:full": "npm test && node tests/code-review/host-selftest.mjs && node tests/code-review/git-ocr.test.mjs",
+    "pack:check": "npm pack --dry-run"
   },
   "keywords": [
     "dsh",

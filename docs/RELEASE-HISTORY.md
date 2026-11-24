@@ -2,6 +2,22 @@
 
 > 关键版本保留在 GitHub Releases；其余版本的说明归档于此（tag/release 已删除，提交仍可通过 SHA 访问）。
 
+## Kept releases（v0.9.5）
+
+### v0.9.5 — 发布链路：tag 自动发 npm
+
+- 新增 GitHub Actions：`.github/workflows/release.yml`（打 tag → 校验版本 → 测试 → npm publish → GitHub Release）与 `.github/workflows/ci.yml`（main/PR 跑离线测试）。
+- `package.json` 去掉 `private`，补 `publishConfig`（`access: public` + `registry.npmjs.org`）与 `scripts`（`test` / `test:full` / `pack:check`）。
+- 自测不再硬编码本机路径：`host-selftest` 自动生成 `diffdemo` 夹具、`git-ocr` 用仓库自身兜底、`delegate-selftest` 评审目标改为仓库根。
+- 发布流程见 [docs/PUBLISHING.md](PUBLISHING.md)。
+
+## Unreleased
+
+### scope 统一回 `@jkin8010`
+
+- npm 包名与 GitHub 仓库统一为 `@jkin8010/dsh-code-review` / `github.com/jkin8010/dsh-code-review`（中途曾试过 `@qise-tech` 前缀，已回退）。
+- 发布方式改为 GitHub Actions：打 tag 自动发布到 npm + 建 GitHub Release，见 [docs/PUBLISHING.md](PUBLISHING.md)。
+
 ## Kept releases
 
 | Tag | Date | Title |
@@ -38,13 +54,13 @@ _Released 2026-11-10_
 
 安装后若返回 `restart-required`，重启 DSH 即可看到左侧栏「代码评审中心」。
 
-### v0.1.2 — 包名迁移到 @jkin8010/dsh-code-review
+### v0.1.2 — 包名迁移到 @qise-tech/dsh-code-review
 
 _Released 2026-11-10_
 
 ## 变更
 
-- 包 scope 从 `@qise/dsh-code-review` 迁移为 **`@jkin8010/dsh-code-review`**（根清单、bundle patch、client 模块 id、文档与配置示例统一更新）。
+- 包 scope 从 `@qise/dsh-code-review` 迁移为 **`@qise-tech/dsh-code-review`**（根清单、bundle patch、client 模块 id、文档与配置示例统一更新）。
 - 版本 0.1.2。
 - 已在本机 desktop profile 完成迁移验证：依赖、`dsh.profile.bundles`、`cordis.patch.yml` 行名、安装后 manifest 与 `exports` 解析均指向新包名。
 
@@ -52,7 +68,7 @@ _Released 2026-11-10_
 
 - 从 Git URL 安装（推荐）：
   `plugin_manager → install_bundle → https://github.com/jkin8010/dsh-code-review`
-- 已安装旧 `@qise/dsh-code-review` 的 profile：先移除旧包，再按上面安装；或手工把依赖/bundles/patch 行改为 `@jkin8010/dsh-code-review` 后重启 DSH。
+- 已安装旧 `@qise/dsh-code-review` 的 profile：先移除旧包，再按上面安装；或手工把依赖/bundles/patch 行改为 `@qise-tech/dsh-code-review` 后重启 DSH。
 
 ### v0.2.1 — 提升暗色界面文字对比度
 

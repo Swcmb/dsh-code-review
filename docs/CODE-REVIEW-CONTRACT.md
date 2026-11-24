@@ -2,7 +2,7 @@
 
 English | [简体中文](CODE-REVIEW-CONTRACT.zh.md)
 
-Plugin package: this repository root (`@jkin8010/dsh-code-review` v0.9.4).
+Plugin package: this repository root (`@jkin8010/dsh-code-review` v0.9.5).
 Built on [alibaba/open-code-review](https://github.com/alibaba/open-code-review) (`ocr` CLI v1.13+).
 Sidebar entry `sidebar.panellist` (id `code-review`) + full page `main` (key `code-review`).
 The client fetches data over authenticated RPC; the host owns all I/O (git / ocr subprocesses / persistence).

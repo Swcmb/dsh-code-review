@@ -1,0 +1,97 @@
+name: Release
+
+# 打 tag（v*）即自动发布到 npm，并创建 GitHub Release。
+# 版本号必须与 tag 一致：tag v0.9.5 → package.json 0.9.5，否则流水线失败。
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write   # 创建 GitHub Release
+  id-token: write   # npm provenance（OIDC 签名）
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify tag matches package.json
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        shell: bash
+        run: |
+          set -euo pipefail
+          PKG=$(node -p "require('./package.json').version")
+          TAG="${GITHUB_REF_NAME#v}"
+          echo "package.json: $PKG / tag: $TAG"
+          if [ "$PKG" != "$TAG" ]; then
+            echo "::error::tag ${GITHUB_REF_NAME} 与 package.json 版本 $PKG 不一致"
+            exit 1
+          fi
+          echo "version=$PKG" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: Self-tests (no ocr / no LLM)
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Engine self-test
+        run: node tests/code-review/engine-selftest.mjs
+      - name: Delegate self-test
+        run: node tests/code-review/delegate-selftest.mjs
+      - name: Tool self-test
+        run: node tests/code-review/tool-selftest.mjs
+      - name: Analyze tests
+        run: node tests/code-review/analyze.test.mjs
+      - name: Package smoke test
+        run: |
+          set -euo pipefail
+          npm pack --dry-run
+          node -e "import('./index.js').then(m => { if (!m.apply) throw new Error('index.js 未导出 apply'); console.log('apply ok:', m.name) })"
+
+  publish:
+    name: Publish to npm
+    needs: [verify, test]
+    runs-on: ubuntu-latest
+    # 与仓库里已创建的环境同名（该环境里存了 NPM_TOKEN secret）
+    environment: NPM_TOKEN
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          npm publish --access public --provenance
+
+  release:
+    name: GitHub Release
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Pack tarball
+        run: npm pack
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: '*.tgz'
+          generate_release_notes: true
+          fail_on_unmatched_files: true

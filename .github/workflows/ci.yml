@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Self-tests (no ocr / no LLM)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Engine self-test
+        run: node tests/code-review/engine-selftest.mjs
+      - name: Delegate self-test
+        run: node tests/code-review/delegate-selftest.mjs
+      - name: Tool self-test
+        run: node tests/code-review/tool-selftest.mjs
+      - name: Analyze tests
+        run: node tests/code-review/analyze.test.mjs
+      - name: Package smoke test
+        run: |
+          set -euo pipefail
+          npm pack --dry-run
+          node -e "import('./index.js').then(m => { if (!m.apply) throw new Error('index.js 未导出 apply'); console.log('apply ok:', m.name) })"

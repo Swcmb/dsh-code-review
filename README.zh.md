@@ -100,7 +100,16 @@
 
 需要 DeepSeek Harness（含 Web UI）、`ocr` CLI ≥ 1.13、`git`、Node 22+。
 
-仓库根 `package.json` 是唯一的 DSH bundle 清单（`dsh.bundle → cordis.patch.yml`），插件代码就在仓库根（没有 `plugins/` 子目录），因此可以**直接从 Git URL 安装**。
+仓库根 `package.json` 是唯一的 DSH bundle 清单（`dsh.bundle → cordis.patch.yml`），插件代码就在仓库根（没有 `plugins/` 子目录），因此**既可以从 npm 安装，也可以直接从 Git URL 安装**。
+
+### 从 npm 安装（推荐）
+
+```bash
+# 打 tag 后由 GitHub Actions 自动发布到 npm；装好后在 DSH 里执行：
+plugin_manager → action: install_bundle, target: @jkin8010/dsh-code-review
+```
+
+> npm 包名：`@jkin8010/dsh-code-review`。发布流程见 [docs/PUBLISHING.md](docs/PUBLISHING.md)。
 
 ### 一键安装（把下面这行 Prompt 发给 DSH）
 

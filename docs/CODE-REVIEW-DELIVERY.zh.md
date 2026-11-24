@@ -2,7 +2,7 @@
 
 简体中文 | [English](CODE-REVIEW-DELIVERY.md)
 
-> 插件包：本仓库根目录（`@jkin8010/dsh-code-review` v0.9.4）
+> 插件包：本仓库根目录（`@jkin8010/dsh-code-review` v0.9.5）
 > 依赖：`ocr`（`@alibaba-group/open-code-review`）v1.13.6、`git`、Node 22+
 > 本机已安装到 desktop profile；**重启 DSH 后生效**（见文末）。
 

@@ -939,7 +939,7 @@ export function buildMock() {
           ],
           entries: [
             { name: 'jkin8010', path: '/Users/jkin/workspace/jkin8010', hidden: false },
-            { name: 'qise-tech', path: '/Users/jkin/workspace/qise-tech', hidden: false },
+            { name: 'jkin8010', path: '/Users/jkin/workspace/jkin8010', hidden: false },
             { name: 'synapse-router', path: '/Users/jkin/workspace/synapse-router', hidden: false },
           ],
         };

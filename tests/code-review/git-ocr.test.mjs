@@ -53,6 +53,8 @@ await writeFile(join(NON_GIT, 'icon.svg'), '<svg/>\n');
 const REPO_CANDIDATES = [
   join(homedir(), 'workspace', 'jkin8010', 'mopng-api'),
   join(homedir(), 'workspace', 'jkin8010', 'prompt-hub'),
+  // CI / 干净 clone：本仓库自身也是 git 仓库，可直接作为真实仓库夹具。
+  ROOT,
 ];
 
 const stats = { passed: 0, failed: 0, skipped: 0 };
