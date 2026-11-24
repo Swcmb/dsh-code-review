@@ -18,23 +18,31 @@ npm login                                  # 浏览器授权
 npm publish --access public                # 首次手动发布（也可直接靠 CI）
 ```
 
-### 2. 生成 npm Automation Token
+### 2. 生成 npm Granular Access Token
 
-npm 站点 → Access Tokens → Generate New Token → **Automation**（CI 用，不需要 OTP）。
+> **2025 年 11 月起 npm 只支持 Granular token**，Automation / Publish（Classic）令牌已下线。网上教你选 "Automation" 的教程都过时了，页面里也找不到这个选项。
 
-> 注意：Automation token 只对 **npmjs.org** 有效，npmmirror 镜像不可发布。
+npm 站点 → 右上头像 → **Access Tokens** → **Generate New Token** → 选 **Granular Access Token**，然后按下表填：
 
-### 3. 写进 GitHub Secrets（仓库级或环境级）
+| 字段 | 填什么 | 说明 |
+|---|---|---|
+| **Token name** | `dsh-code-review-ci` | 任意 |
+| **Bypass two-factor authentication (2FA)** | ✅ **必须勾选** | 不勾选的话 CI 发布时会被要求输入 OTP，报 `EOTP` |
+| **Permissions** | `Read and write`（publish and stage） | 只读无法发布 |
+| **Packages and scopes** | `All packages`（或只选 `@jkin8010` scope） | 二选一即可 |
+| **Organizations** | `No access`（除非要发到组织） | 可选 |
+| **Expiration** | 90 天（或自定义） | 到期要重新生成并更新 secret |
 
-> 本仓库实际把 secret 挂在**环境 `NPM_TOKEN`** 下（Settings → Environments → NPM_TOKEN），工作流用 `environment: NPM_TOKEN` 取到它。仓库级 secret 也行，二选一。
+> 「Bypass two-factor authentication」是这次 `EOTP` 失败的直接原因：token 是 Publish/Classic 类型，CI 里没人能输 OTP。
+> 该 token 只对 **npmjs.org** 有效，npmmirror 镜像不可发布。
 
-### 3b. 写进 GitHub Secrets
+### 3. 写进 GitHub Secrets
 
-仓库 → Settings → Secrets and variables → Actions → New repository secret：
+本仓库把 secret 挂在**环境 `NPM_TOKEN`** 下（Settings → Environments → NPM_TOKEN），工作流用 `environment: NPM_TOKEN` 取到它；仓库级 secret（Settings → Secrets and variables → Actions）也可以，二选一。
 
 | Name | Value |
 |---|---|
-| `NPM_TOKEN` | 上一步生成的 Automation token |
+| `NPM_TOKEN` | 上一步生成的 Granular token |
 
 > 工作流里也声明了 `id-token: write`，用于 npm provenance（OIDC 签名）。若不想用 provenance，删掉 `--provenance` 即可。
 > 若改用 npm Trusted Publishing（OIDC，无需 token），可去掉 `NODE_AUTH_TOKEN`，并把 `environment: npm` 在 npm 站点登记为 trusted publisher。

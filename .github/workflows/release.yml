@@ -76,6 +76,8 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -euo pipefail
+          # Granular access token 需要 npm >= 5.5.1；setup-node 自带的通常已满足，这里显式确认
+          npm --version
           npm publish --access public --provenance
 
   release:
