@@ -24,7 +24,11 @@ npm 站点 → Access Tokens → Generate New Token → **Automation**（CI 用�
 
 > 注意：Automation token 只对 **npmjs.org** 有效，npmmirror 镜像不可发布。
 
-### 3. 写进 GitHub Secrets
+### 3. 写进 GitHub Secrets（仓库级或环境级）
+
+> 本仓库实际把 secret 挂在**环境 `NPM_TOKEN`** 下（Settings → Environments → NPM_TOKEN），工作流用 `environment: NPM_TOKEN` 取到它。仓库级 secret 也行，二选一。
+
+### 3b. 写进 GitHub Secrets
 
 仓库 → Settings → Secrets and variables → Actions → New repository secret：
 
@@ -68,6 +72,7 @@ git push origin main --tags
 
 | 现象 | 原因 | 处理 |
 |---|---|---|
+| `EOTP`（This operation requires a one-time password） | `NPM_TOKEN` 里放的是 **Publish/Classic token** 且账号开了 2FA；Automation token 不需要 OTP | 到 npm 重新生成 **Automation** token，覆盖环境 `NPM_TOKEN` 里的值 |
 | `E404` / `E403` on publish | token 无权限 / scope 不存在 / 被 npmmirror 拦 | 确认 token 是 npmjs 的 Automation token，且 `publishConfig.registry` 指向 npmjs |
 | `EPUBLISHCONFLICT` | 该版本已发布 | 升版本号重新打 tag |
 | `verify` job 失败 | tag 与 package.json 版本不一致 | 改 package.json 版本，或重打 tag |
