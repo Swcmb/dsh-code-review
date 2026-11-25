@@ -64,9 +64,11 @@ jobs:
     needs: [verify, test]
     runs-on: ubuntu-latest
     # Trusted Publishing（OIDC）：不需要任何 token/secret。
-    # npm 站点上该包的 trusted publisher 必须登记成：
-    #   Publisher: GitHub Actions / 仓库: jkin8010/dsh-code-review / Workflow filename: release.yml
-    #   Environment name: （留空，或与下面 environment 完全一致）
+    # npm 站点上该包的 trusted publisher 登记为：
+    #   Publisher: GitHub Actions / 仓库: jkin8010/dsh-code-review
+    #   Workflow filename: release.yml / Environment name: npm
+    # 下面这个 environment 必须与 npm 站点登记的 Environment name 完全一致。
+    environment: npm
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
