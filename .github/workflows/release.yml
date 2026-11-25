@@ -63,23 +63,25 @@ jobs:
     name: Publish to npm
     needs: [verify, test]
     runs-on: ubuntu-latest
-    # 与仓库里已创建的环境同名（该环境里存了 NPM_TOKEN secret）
-    environment: NPM_TOKEN
+    # Trusted Publishing（OIDC）：不需要任何 token/secret。
+    # npm 站点上该包的 trusted publisher 必须登记成：
+    #   Publisher: GitHub Actions / 仓库: jkin8010/dsh-code-review / Workflow filename: release.yml
+    #   Environment name: （留空，或与下面 environment 完全一致）
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
-      - name: Publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Ensure npm CLI supports trusted publishing (>= 11.5.1)
         run: |
           set -euo pipefail
+          npm install -g npm@latest
           npm --version
-          # 先确认 token 有效且能识别账号；失败说明 secret 本身不对（过期/被撤销/贴错）
-          echo "whoami: $(npm whoami)"
-          # 若报 EOTP，说明该 token 没有勾选 Bypass 2FA，需要重新生成 Granular token
+      - name: Publish
+        run: |
+          set -euo pipefail
+          # 不设置 NODE_AUTH_TOKEN —— 由 OIDC 换取一次性发布凭据
           npm publish --access public --provenance
 
   release:

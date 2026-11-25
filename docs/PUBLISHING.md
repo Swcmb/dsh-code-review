@@ -3,7 +3,7 @@
 > 打 tag 即自动发布：`git tag vX.Y.Z && git push origin vX.Y.Z` → GitHub Actions 跑测试 → 发布到 npm → 建 GitHub Release。
 
 > 仓库归属：`github.com/jkin8010/dsh-code-review`（GitHub 个人仓库，不变）；npm scope：`@jkin8010`（npm 组织）。
-> 两者一致：GitHub 仓库与 npm scope 都是 `jkin8010`，CI 的 `NPM_TOKEN` 需属于 `@jkin8010` 组织成员。
+> 两者一致：GitHub 仓库与 npm scope 都是 `jkin8010`。CI 用 **Trusted Publishing（OIDC）** 发布，不需要任何 token/secret。
 
 ## 一、一次性配置
 
@@ -18,34 +18,33 @@ npm login                                  # 浏览器授权
 npm publish --access public                # 首次手动发布（也可直接靠 CI）
 ```
 
-### 2. 生成 npm Granular Access Token
+### 2. 登记 Trusted Publisher（OIDC，无需任何 token）
 
-> **2025 年 11 月起 npm 只支持 Granular token**，Automation / Publish（Classic）令牌已下线。网上教你选 "Automation" 的教程都过时了，页面里也找不到这个选项。
+> **这是当前唯一可行的 CI 发布方式。** npm 的 Granular token 在 2026-07-31 起被限制：勾了 Bypass 2FA 的 token 也不能再直接 publish，会被要求交互式 OTP（`EOTP`）；2027-01 起彻底禁止。
+> 结论：**别再用 token 发布**，改用 Trusted Publishing（OIDC）。
 
-npm 站点 → 右上头像 → **Access Tokens** → **Generate New Token** → 选 **Granular Access Token**，然后按下表填：
+npm 站点 → 进入包页面 → **Settings** → **Trusted Publisher** → **GitHub Actions**，按下表填：
 
-| 字段 | 填什么 | 说明 |
-|---|---|---|
-| **Token name** | `dsh-code-review-ci` | 任意 |
-| **Bypass two-factor authentication (2FA)** | ✅ **必须勾选** | 不勾选的话 CI 发布时会被要求输入 OTP，报 `EOTP` |
-| **Permissions** | `Read and write`（publish and stage） | 只读无法发布 |
-| **Packages and scopes** | `All packages`（或只选 `@jkin8010` scope） | 二选一即可 |
-| **Organizations** | `No access`（除非要发到组织） | 可选 |
-| **Expiration** | 90 天（或自定义） | 到期要重新生成并更新 secret |
-
-> 「Bypass two-factor authentication」是这次 `EOTP` 失败的直接原因：token 是 Publish/Classic 类型，CI 里没人能输 OTP。
-> 该 token 只对 **npmjs.org** 有效，npmmirror 镜像不可发布。
-
-### 3. 写进 GitHub Secrets
-
-本仓库把 secret 挂在**环境 `NPM_TOKEN`** 下（Settings → Environments → NPM_TOKEN），工作流用 `environment: NPM_TOKEN` 取到它；仓库级 secret（Settings → Secrets and variables → Actions）也可以，二选一。
-
-| Name | Value |
+| 字段 | 填什么 |
 |---|---|
-| `NPM_TOKEN` | 上一步生成的 Granular token |
+| **Publisher** | `GitHub Actions` |
+| **Organization or user** | `jkin8010` |
+| **Repository** | `dsh-code-review` |
+| **Workflow filename** | `release.yml`（**必须带 `.yml`，且大小写完全一致**） |
+| **Environment name** | 留空（工作流里也没有设置 `environment`） |
 
-> 工作流里也声明了 `id-token: write`，用于 npm provenance（OIDC 签名）。若不想用 provenance，删掉 `--provenance` 即可。
-> 若改用 npm Trusted Publishing（OIDC，无需 token），可去掉 `NODE_AUTH_TOKEN`，并把 `environment: npm` 在 npm 站点登记为 trusted publisher。
+要求：
+
+- npm CLI **≥ 11.5.1**（工作流里用 `npm install -g npm@latest` 保证）；
+- Node **≥ 22.14.0**；
+- 工作流必须有 `permissions: id-token: write`（`release.yml` 已声明）；
+- 只支持 GitHub 托管 runner，自托管 runner 不行。
+
+### 3. GitHub 侧不需要 secret
+
+OIDC 发布**不需要** `NPM_TOKEN`，也不需要任何 secret。仓库里已有的环境 `NPM_TOKEN` 与 secret 可以删掉，避免混淆。
+
+> 工作流里仍然声明了 `id-token: write`，既用于 OIDC 换取发布凭据，也用于 npm provenance 签名。
 
 ## 二、日常发布
 
@@ -80,8 +79,9 @@ git push origin main --tags
 
 | 现象 | 原因 | 处理 |
 |---|---|---|
-| `EOTP`（This operation requires a one-time password） | `NPM_TOKEN` 里放的是 **Publish/Classic token** 且账号开了 2FA；Automation token 不需要 OTP | 到 npm 重新生成 **Automation** token，覆盖环境 `NPM_TOKEN` 里的值 |
-| `E404` / `E403` on publish | token 无权限 / scope 不存在 / 被 npmmirror 拦 | 确认 token 是 npmjs 的 Automation token，且 `publishConfig.registry` 指向 npmjs |
+| `EOTP`（This operation requires a one-time password） | 用了 token 发布，而 npm 从 2026-07-31 起不再允许 token 直接 publish（即使勾了 Bypass 2FA） | 改用 **Trusted Publishing（OIDC）**：删掉 `NODE_AUTH_TOKEN`，在 npm 站点登记 trusted publisher |
+| `ENEEDAUTH` / `Unable to authenticate` | OIDC 换不到凭据：workflow 文件名、仓库、环境名与 npm 站点登记不一致，或缺 `id-token: write` | 逐字核对 npm 站点上的 `Workflow filename`（必须 `release.yml`）与仓库名；确认 `permissions: id-token: write` |
+| `E404` / `E403` on publish | 包不存在 / 无权限 / 被 npmmirror 拦 | 首次发布前该包需在 npm 上存在才能登记 trusted publisher；`publishConfig.registry` 必须指向 npmjs |
 | `EPUBLISHCONFLICT` | 该版本已发布 | 升版本号重新打 tag |
 | `verify` job 失败 | tag 与 package.json 版本不一致 | 改 package.json 版本，或重打 tag |
 | `provenance` 报错 | 仓库是私有 / 无 `id-token` | 删掉 `--provenance`，或公开仓库 |
