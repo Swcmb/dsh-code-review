@@ -76,8 +76,10 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -euo pipefail
-          # Granular access token 需要 npm >= 5.5.1；setup-node 自带的通常已满足，这里显式确认
           npm --version
+          # 先确认 token 有效且能识别账号；失败说明 secret 本身不对（过期/被撤销/贴错）
+          echo "whoami: $(npm whoami)"
+          # 若报 EOTP，说明该 token 没有勾选 Bypass 2FA，需要重新生成 Granular token
           npm publish --access public --provenance
 
   release:
