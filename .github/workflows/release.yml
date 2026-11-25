@@ -81,6 +81,12 @@ jobs:
       - name: Publish
         run: |
           set -euo pipefail
+          # 首次发布无法用 OIDC（npm 不支持为尚不存在的包登记 trusted publisher），
+          # 需要先在本地手动发布一次占位版本，之后 CI 才能接管。
+          if [ "$(curl -s -o /dev/null -w '%{http_code}' https://registry.npmjs.org/@jkin8010%2Fdsh-code-review)" = "404" ]; then
+            echo "::error::包尚未在 npm 上存在，OIDC 无法发布首个版本。请先在本地执行一次 npm publish 完成首次发布，再重跑本工作流。"
+            exit 1
+          fi
           # 不设置 NODE_AUTH_TOKEN —— 由 OIDC 换取一次性发布凭据
           npm publish --access public --provenance
 

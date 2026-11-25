@@ -18,6 +18,19 @@ npm login                                  # 浏览器授权
 npm publish --access public                # 首次手动发布（也可直接靠 CI）
 ```
 
+### 0. 首次发布必须手动做一次（OIDC 的硬限制）
+
+> npm **不支持为尚不存在的包预配置 Trusted Publisher**——配置入口在包自己的 Settings 页上，包不存在就没有那个页面。
+> 所以 CI 的 OIDC 发布只能用于**已经存在于 npm 上的包**。首次发布要手动完成一次。
+
+```bash
+npm login                                  # 浏览器授权，账号需有 @jkin8010 发布权限
+npm whoami                                 # 确认是 qise-tech 或组织成员
+npm publish --access public                # 首次发布（会要求 OTP，手动输入）
+```
+
+发布成功后，包页面才会出现，才能进下一步登记 Trusted Publisher。
+
 ### 2. 登记 Trusted Publisher（OIDC，无需任何 token）
 
 > **这是当前唯一可行的 CI 发布方式。** npm 的 Granular token 在 2026-07-31 起被限制：勾了 Bypass 2FA 的 token 也不能再直接 publish，会被要求交互式 OTP（`EOTP`）；2027-01 起彻底禁止。
