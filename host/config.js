@@ -167,21 +167,16 @@ function pathCandidates() {
   const windows = process.platform === 'win32';
   const names = windows ? ['ocr.exe', 'ocr.cmd', 'ocr.bat'] : ['ocr'];
   const list = [];
-  for (const dir of String(process.env.PATH ?? '').split(delimiter)) {
-    if (!dir) continue;
+  const pushDir = (dir) => {
+    if (!dir) return;
     for (const name of names) list.push(join(dir, name));
-  }
+  };
+  for (const dir of String(process.env.PATH ?? '').split(delimiter)) pushDir(dir);
   if (windows) {
     // The npm prefix is not always on PATH when the host was launched from a
     // GUI shell, so probe the well-known install roots explicitly.
-    const roots = [
-      process.env.APPDATA ? join(process.env.APPDATA, 'npm') : '',
-      process.env.ProgramFiles ? join(process.env.ProgramFiles, 'nodejs') : '',
-    ];
-    for (const root of roots) {
-      if (!root) continue;
-      for (const name of names) list.push(join(root, name));
-    }
+    pushDir(process.env.APPDATA ? join(process.env.APPDATA, 'npm') : '');
+    pushDir(process.env.ProgramFiles ? join(process.env.ProgramFiles, 'nodejs') : '');
     return list;
   }
   list.push(
